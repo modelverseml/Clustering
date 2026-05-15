@@ -1,3 +1,14 @@
+"""
+Shared helpers for centroid-based clustering algorithms
+-------------------------------------------------------
+These functions are reused by K-Means, K-Means++, Mini-Batch K-Means++ and
+K-Medoids:
+
+    _assign_cluster                - assign a sample to its nearest centroid
+    _update_centroids              - move centroids to the mean of their cluster
+    _compute_inertia               - within-cluster sum of squared distances
+    _initialise_centorids_or_medoids - K-Means++ probabilistic seeding
+"""
 
 import numpy as np
 import pandas as pd

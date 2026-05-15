@@ -1,4 +1,4 @@
-# Ml Clustering
+# ML Clustering
 
 In machine learning, we usually deal with two main types of problems — supervised and unsupervised learning.
 
@@ -10,7 +10,148 @@ A common example of unsupervised learning is clustering, where we group similar 
 
 In short, clustering helps us make sense of unlabeled data by organizing it into meaningful groups — which can then be used for insights, recommendations, or decision-making.
 
- 
+## Repository Structure
+
+```
+ml_clustering/
+├── README.md
+├── requirements.txt
+├── ml_clustering.ipynb                       # End-to-end walkthrough on a 2D toy dataset
+├── clustering_tests.ipynb                    # Validates each from-scratch algo against sklearn
+├── centroid_methods_common_functions.py      # Shared helpers (assignment, update, inertia, K-Means++ seeding)
+├── kmeans.py                                 # K-Means (random init)
+├── kmeanspp.py                               # K-Means++ (smart init via probability-weighted seeding)
+├── mini_batch_kmeanspp.py                    # Mini-Batch K-Means++ for large datasets
+├── kmedoids.py                               # K-Medoids (medoid instead of mean; outlier-robust)
+├── dbscan.py                                 # DBSCAN (density-based)
+├── optics.py                                 # OPTICS (reachability ordering)
+├── hdbscan.py                                # HDBSCAN (work in progress)
+├── agglomerative.py                          # Hierarchical bottom-up (single / complete / average linkage)
+├── divisive.py                               # Hierarchical top-down (DIANA splinter-group)
+├── gmm.py                                    # Gaussian Mixture Model via EM
+├── mean_shift.py                             # Mean Shift (mode seeking, flat kernel)
+├── affinity_propagation.py                   # Message-passing exemplar selection
+├── spectral.py                               # Spectral clustering on the normalised Laplacian
+├── birch.py                                  # BIRCH (Clustering Features + K-Means on summaries)
+├── Images/                                   # Diagrams used in this README
+├── Files/
+└── generated_images/                         # Plots produced by the notebook
+```
+
+## Getting Started
+
+```bash
+git clone https://github.com/modelverseml/ml_clustering.git
+cd ml_clustering
+pip install -r requirements.txt
+jupyter notebook ml_clustering.ipynb
+```
+
+For a quick correctness check, [`clustering_tests.ipynb`](clustering_tests.ipynb) runs every from-scratch algorithm on `make_blobs`, `make_moons`, and `make_circles` and compares the labels against scikit-learn using Adjusted Rand Index. This is also where you can see the canonical *failure mode* of centroid methods on non-convex data — and how DBSCAN/OPTICS handle the same datasets cleanly.
+
+## Topics Covered
+
+1. [Optimal Cluster Number](#optimal-cluster-number) — Elbow method and Silhouette score for picking K
+2. [Centroid-Based Methods](#centroid-based-methods) — K-Means, K-Means++, Mini-Batch K-Means, K-Medoids
+3. [Density-Based Methods](#density-based-methods) — DBSCAN, OPTICS, HDBSCAN
+4. [Hierarchical Methods](#hierarchical-methods) — Agglomerative (bottom-up) and Divisive (top-down)
+5. [Distribution-Based Methods](#distribution-based-methods) — Gaussian Mixture Models
+6. [Other Methods](#mean-shift-clustering) — Mean Shift, Affinity Propagation, BIRCH, Spectral
+
+## Code Modules
+
+The centroid-based classes share the same `get_clusters()` interface and return `(inertia, centroids/medoids, labels)`, so they can be swapped freely in the notebook. All from-scratch implementations expect a `pandas.DataFrame` of numeric features.
+
+### Centroid-based clustering
+
+```python
+from kmeans import ManualKMeans
+from kmeanspp import ManualKMeansPP
+from mini_batch_kmeanspp import MiniBatchKmeanspp
+from kmedoids import KMedoids
+
+# K-Means with random initialization
+model = ManualKMeans(data=X, n_clusters=4)
+inertia, centroids, labels = model.get_clusters(threshold=0.001, max_iter=100)
+
+# K-Means++ -- same algorithm but with probability-weighted seeding
+model = ManualKMeansPP(n_clusters=4, data=X)
+inertia, centroids, labels = model.get_clusters()
+
+# Mini-Batch K-Means++ -- updates centroids on random batches each iteration
+model = MiniBatchKmeanspp(data=X, n_clusters=4)
+inertia, centroids, labels = model.get_clusters(batch_size=256, max_iter=100)
+
+# K-Medoids -- centers are real data points, robust to outliers
+model = KMedoids(n_clusters=4, data=X)
+inertia, medoids, labels = model.get_clusters()
+```
+
+### Density-based clustering
+
+```python
+from dbscan import DBSCAN
+from optics import OPTICS
+
+# DBSCAN -- noise is labelled -1, other clusters are 0, 1, 2, ...
+model = DBSCAN(data=X, epsilon=0.3, MinPts=5)
+labels = model.get_clusters()
+
+# OPTICS -- builds a reachability ordering, then extracts flat clusters
+model = OPTICS(data=X, epsilon=0.5, MinPts=5, cluster_epsilon=0.3)
+labels = model.order_data()
+```
+
+`hdbscan.py` is a work-in-progress stub; use scikit-learn's `hdbscan` package for production HDBSCAN.
+
+### Hierarchical clustering
+
+```python
+from agglomerative import Agglomerative
+from divisive import Divisive
+
+# Bottom-up: merge closest clusters until we reach n_clusters
+model = Agglomerative(data=X, n_clusters=3, linkage='average')  # also 'single', 'complete'
+labels = model.get_clusters()
+
+# Top-down (DIANA): split the most dissimilar cluster at each step
+labels = Divisive(data=X, n_clusters=3).get_clusters()
+```
+
+### Distribution-based and other algorithms
+
+```python
+from gmm import GMM
+from mean_shift import MeanShift
+from affinity_propagation import AffinityPropagation
+from spectral import SpectralClustering
+from birch import BIRCH
+
+# Gaussian Mixture Model — soft clustering via EM
+gmm = GMM(data=X, n_components=3).fit()
+labels = gmm.get_clusters()
+probs  = gmm.responsibilities         # n x K soft assignments
+
+# Mean Shift — auto-discovers the number of clusters from a bandwidth
+ms = MeanShift(data=X, bandwidth=1.0).fit()
+labels = ms.get_clusters()
+
+# Affinity Propagation — auto-discovers exemplars and clusters
+ap = AffinityPropagation(data=X, damping=0.9).fit()
+labels = ap.get_clusters()
+exemplars = ap.exemplars_
+
+# Spectral — eigenvectors of the Laplacian, then K-Means in eigen-space
+sc = SpectralClustering(data=X, n_clusters=3, sigma=1.0).fit()
+labels = sc.get_clusters()
+
+# BIRCH — single-pass CF summarisation, then K-Means on the summaries
+b = BIRCH(data=X, n_clusters=3, threshold=0.5).fit()
+labels = b.get_clusters()
+```
+
+<br><br>
+
 <p align="center">
 <img src="Images/clustering.png" alt="clustering" width="50%"/>
 </p>
@@ -242,7 +383,7 @@ To overcome this, Mini-Batch K-Means introduces the concept of mini-batches. Ins
 - Computationally efficient compared to standard K-Means.
 - Uses random mini-batches to update centroids, improving scalability.
 - Inherits the same disadvantages as K-Means (e.g., need to predefine k, sensitivity to initialization, and potential convergence to local minima).
-- [View Mini-Batch K-Means manual code implementation](kmeans.py)
+- [View Mini-Batch K-Means manual code implementation](mini_batch_kmeanspp.py)
 
 <br><br>
 
@@ -272,7 +413,7 @@ P(x_i) = \frac{D(x_i)^2}{\sum_{x_j \in X} D(x_j)^2}
 $$
 - Repeat steps 2–3 until all k centroids are initialized.
 - Proceed with the standard K-Means algorithm (assignment and update steps).
-- [View K++Means manual code implementation](kppmeans.py)
+- [View K-Means++ manual code implementation](kmeanspp.py)
 
 K-Means++ only improves the initialization step of K-Means.
 
@@ -722,6 +863,7 @@ $$
 - Update Distance Matrix: Recalculate distances between the new cluster and existing clusters.
 - Repeat: Continue merging until all points form a single cluster or stopping criterion is met.
 - Build Dendrogram: Visualize merges to see cluster hierarchy
+- [View Agglomerative manual code implementation](agglomerative.py)
 
 <br>
 
@@ -809,6 +951,7 @@ $$
 - Select the next cluster to split (largest or most heterogeneous).
 - Repeat until stopping condition is met.
 - Visualize splits using a dendrogram.
+- [View Divisive manual code implementation](divisive.py)
 
 
 <br>
@@ -917,6 +1060,7 @@ $$
       - Maximim iterations reached
 - Final Output
    - cluter assignment : take cluster with max responsibility
+- [View GMM manual code implementation](gmm.py)
  
 <br>
 
@@ -994,6 +1138,7 @@ $$
    - Move the point toward that mean.
 -  Repeat step 3 until convergence (movement becomes negligible).
 -  Cluster assignment: Points that converge to the same location belong to the same cluster.
+- [View Mean Shift manual code implementation](mean_shift.py)
 
 <br>
 
@@ -1095,6 +1240,7 @@ $$
 
 7. Assign each data point to the exemplar with the highest value.
 8. Stop when values converge or after max iterations.
+- [View Affinity Propagation manual code implementation](affinity_propagation.py)
 
 <br>
 
@@ -1184,6 +1330,7 @@ $$
 2. **Condense Tree (Optional):** Remove outliers or merge small clusters.  
 3. **Global Clustering:** Apply a clustering algorithm (e.g., K-Means) on leaf CFs.  
 4. **Refinement (Optional):** Reassign original points for better accuracy.
+- [View BIRCH manual code implementation](birch.py)
 
 <br>
 
@@ -1279,6 +1426,7 @@ $$
 4. Construct matrix U using eigenvectors as rows.  
 5. (Optional) Normalize rows of U.  
 6. Apply **K-Means** on U to get cluster assignments.
+- [View Spectral manual code implementation](spectral.py)
 
 <br>
 

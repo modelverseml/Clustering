@@ -1,9 +1,43 @@
+"""
+OPTICS (Ordering Points To Identify the Clustering Structure)
+-------------------------------------------------------------
+A density-based clustering algorithm that improves on DBSCAN by ordering
+the points so that spatially-close points become neighbours in the
+ordering. The output is a reachability plot rather than a flat clustering,
+so different clustering granularities can be extracted afterwards by
+picking different reachability thresholds.
+
+Key distances used:
+    core-dist(p)         - distance to p's MinPts-th nearest neighbour
+    reach-dist(p, q)     - max(core-dist(p), dist(p, q))
+
+A priority queue (min-heap keyed by reachability distance) is used to
+process points in order of how easily they can be reached from already
+processed core points.
+"""
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import heapq
 
 class OPTICS:
+
+    """
+    Manual implementation of the OPTICS clustering algorithm.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        The dataset to cluster.
+    epsilon : float
+        Maximum neighborhood radius (only used to bound the neighbour search).
+    MinPts : int
+        Minimum points required to compute a core distance.
+    cluster_epsilon : float
+        Reachability threshold used when extracting flat clusters from the
+        ordering produced by OPTICS.
+    """
 
     def __init__(self,data,epsilon,MinPts,cluster_epsilon):
 

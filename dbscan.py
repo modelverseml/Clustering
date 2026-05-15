@@ -1,7 +1,34 @@
+"""
+DBSCAN (Density-Based Spatial Clustering of Applications with Noise)
+--------------------------------------------------------------------
+A from-scratch implementation that groups points by density. Each point is
+classified as a core point, a border point, or noise based on two parameters:
+
+    epsilon  - neighborhood radius
+    MinPts   - minimum number of points required to form a dense region
+
+The algorithm walks every unvisited point, finds its epsilon-neighbours, and
+either starts a new cluster (if it is a core point) or marks the point as
+noise. Clusters are grown by recursively absorbing reachable neighbours.
+"""
+
 import numpy as np
 import pandas as pd
 
 class DBSCAN:
+
+    """
+    Manual implementation of the DBSCAN clustering algorithm.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        The dataset to cluster. Only numeric columns are used for distance.
+    epsilon : float
+        Neighborhood radius for considering two points as neighbours.
+    MinPts : int
+        Minimum number of points required for a region to be dense.
+    """
 
     def __init__(self,data,epsilon,MinPts):
 
@@ -33,7 +60,7 @@ class DBSCAN:
                 if len(neighbour_indices)>= self.MinPts:
                     cluster_id+=1
 
-                    self.data.at[index,'cluter'] = cluster_id
+                    self.data.at[index,'cluster'] = cluster_id
                     self.expand_cluster(neighbour_indices,cluster_id)
 
                 # making it as noise for time being
@@ -56,7 +83,7 @@ class DBSCAN:
                 neighbour_neighbours_indices = self.get_neighbours_index(neighbour_index)
 
                 if len(neighbour_neighbours_indices) >= self.MinPts:
-                    self.data.at[neighbour_index,'cluter'] = cluster_id
+                    self.data.at[neighbour_index,'cluster'] = cluster_id
 
                     neighbour_indices.extend(neighbour_neighbours_indices)
             

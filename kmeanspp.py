@@ -1,3 +1,13 @@
+"""
+K-Means++ clustering (from scratch)
+-----------------------------------
+Same iterative refinement as K-Means, but the initial centroids are seeded
+with the K-Means++ procedure: pick the first centroid at random, then pick
+each subsequent centroid with probability proportional to the squared
+distance from the closest already-chosen centroid. This spreads the initial
+seeds out and usually gives better, more stable clusters than random init.
+"""
+
 from kmeans import ManualKMeans
 import numpy as np
 from centroid_methods_common_functions import _initialise_centorids_or_medoids

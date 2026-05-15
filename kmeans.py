@@ -1,3 +1,14 @@
+"""
+K-Means clustering (from scratch)
+---------------------------------
+Partitions the data into K clusters by alternating two steps:
+
+    1. Assign each sample to its nearest centroid.
+    2. Move each centroid to the mean of its assigned samples.
+
+Iteration stops when the change in inertia (within-cluster sum of squares)
+falls below a threshold or when max_iter is reached.
+"""
 
 import numpy as np
 from centroid_methods_common_functions import _assign_cluster,_compute_inertia,_update_centroids

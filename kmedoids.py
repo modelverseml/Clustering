@@ -1,8 +1,29 @@
+"""
+K-Medoids clustering (from scratch)
+-----------------------------------
+Similar to K-Means, but each cluster is represented by an actual data point
+(the "medoid") rather than the arithmetic mean of its members. The medoid
+of a cluster is the point with the minimum sum of distances to all other
+points in the same cluster. Because medoids are real samples, K-Medoids is
+more robust to outliers than K-Means.
+"""
+
 import numpy as np
 from centroid_methods_common_functions import _assign_cluster,_compute_inertia, \
                                 _initialise_centorids_or_medoids
 
 class KMedoids:
+
+    """
+    Manual implementation of the K-Medoids clustering algorithm.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        The dataset to cluster.
+    n_clusters : int
+        The number of clusters to form.
+    """
 
     def __init__(self,n_clusters,data):
 

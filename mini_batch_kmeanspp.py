@@ -1,9 +1,29 @@
+"""
+Mini-Batch K-Means++ clustering (from scratch)
+----------------------------------------------
+A scalable variant of K-Means++. Instead of using the whole dataset to
+update centroids on every iteration, a random mini-batch is drawn at each
+step and used to update the centroids. This dramatically reduces compute
+per iteration on large datasets while converging to a similar solution.
+"""
+
 import numpy as np
 from centroid_methods_common_functions import _initialise_centorids_or_medoids,\
                                                 _assign_cluster,_compute_inertia, \
                                                 _update_centroids
 
 class MiniBatchKmeanspp:
+
+    """
+    Manual implementation of Mini-Batch K-Means++.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        The dataset to cluster.
+    n_clusters : int
+        The number of clusters to form.
+    """
 
     def __init__(self,data,n_clusters):
 
