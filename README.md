@@ -34,7 +34,6 @@ ml_clustering/
 ├── spectral.py                               # Spectral clustering on the normalised Laplacian
 ├── birch.py                                  # BIRCH (Clustering Features + K-Means on summaries)
 ├── Images/                                   # Diagrams used in this README
-├── Files/
 └── generated_images/                         # Plots produced by the notebook
 ```
 
