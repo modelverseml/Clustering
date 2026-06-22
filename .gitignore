@@ -21,6 +21,9 @@ env/
 # Jupyter
 .ipynb_checkpoints/
 
+# Generated walkthrough plot
+generated_images/clustering_comparison.png
+
 # IDE
 .vscode/
 .idea/

@@ -9,7 +9,7 @@ more robust to outliers than K-Means.
 """
 
 import numpy as np
-from centroid_methods_common_functions import _assign_cluster,_compute_inertia, \
+from .centroid_methods_common_functions import _assign_cluster,_compute_inertia, \
                                 _initialise_centorids_or_medoids
 
 class KMedoids:

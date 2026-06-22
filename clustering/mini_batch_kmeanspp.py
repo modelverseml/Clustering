@@ -8,7 +8,7 @@ per iteration on large datasets while converging to a similar solution.
 """
 
 import numpy as np
-from centroid_methods_common_functions import _initialise_centorids_or_medoids,\
+from .centroid_methods_common_functions import _initialise_centorids_or_medoids,\
                                                 _assign_cluster,_compute_inertia, \
                                                 _update_centroids
 

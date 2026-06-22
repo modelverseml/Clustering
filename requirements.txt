@@ -1,5 +1,3 @@
-jupyter
-ipykernel
 numpy
 pandas
 matplotlib

@@ -8,9 +8,9 @@ distance from the closest already-chosen centroid. This spreads the initial
 seeds out and usually gives better, more stable clusters than random init.
 """
 
-from kmeans import ManualKMeans
+from .kmeans import ManualKMeans
 import numpy as np
-from centroid_methods_common_functions import _initialise_centorids_or_medoids
+from .centroid_methods_common_functions import _initialise_centorids_or_medoids
 
 class ManualKMeansPP:
 
